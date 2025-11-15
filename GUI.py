@@ -1,82 +1,88 @@
 ﻿import tkinter as tk
-
-UNIT_TO_LITERS = {
-    "milliliter (ml)": 0.001,
-    "liter (l)": 1.0,
-    "cubic centimeter (cm³)": 0.001,
-    "cubic meter (m³)": 1000.0,
-    "US gallon (gal)": 3.785411784,
-}
-
 root = tk.Tk()
-root.title("Volume Converter")
-root.geometry("420x320")
+root.title("Zodiac sign finder")
+root.geometry("400x400")
 root.configure(bg="lightblue")
 
-title = tk.Label(root, text="Volume Converter", font=("Arial", 18, "bold"), bg = "lightblue")
-title.pack(pady=(12, 8))
+labelD = tk.Label(root, text="Enter day", font=('Arial', 14), bg = "lightblue")
+labelD.pack(padx=20,pady=10)
 
-frame = tk.Frame(root, bg="lightblue")
-frame.pack(pady=6)
+entryD = tk.Entry(root, width=20, font=('Arial', 14))
+entryD.pack(padx=20,pady=0)
 
-label_value = tk.Label(frame, text="Value", font=("Arial", 12), bg="lightblue")
-label_value.grid(row=0, column=0, padx=8, pady=6, sticky="w")
-entry_value = tk.Entry(frame, font=("Arial", 12), width=12, justify="center", bg = "lightblue")
-entry_value.grid(row=1, column=0, padx=8)
+labelM = tk.Label(root, text="Enter month", font=('Arial', 14), bg = "lightblue")
+labelM.pack(padx=20,pady=10)
+entryM = tk.Entry(root, width=20, font=('Arial', 14))
+entryM.pack(padx=20,pady=0)
 
-label_from = tk.Label(frame, text="From", font=("Arial", 12), bg="lightblue")
-label_from.grid(row=0, column=1, padx=8, pady=6, sticky="w")
-from_var = tk.StringVar(value="liter (l)")
-from_menu = tk.OptionMenu(frame, from_var, *UNIT_TO_LITERS.keys())
-from_menu.config(font=("Arial", 11), width=20)
-from_menu.grid(row=1, column=1, padx=8)
+labelY = tk.Label(root, text="Enter year", font=('Arial', 14), bg = "lightblue")
+labelY.pack(padx=20,pady=10)
+entryY = tk.Entry(root, width=20, font=('Arial', 14))
+entryY.pack(padx=20,pady=0)
 
-label_to = tk.Label(frame, text="To", font=("Arial", 12), bg="lightblue")
-label_to.grid(row=0, column=2, padx=8, pady=6, sticky="w")
-to_var = tk.StringVar(value="milliliter (ml)")
-to_menu = tk.OptionMenu(frame, to_var, *UNIT_TO_LITERS.keys())
-to_menu.config(font=("Arial", 11), width=20)
-to_menu.grid(row=1, column=2, padx=8)
+def is_leap_year(year):
+    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
-label_result = tk.Label(root, text="", font=("Arial", 16, "bold"), bg="lightblue")
-label_result.pack(pady=(14, 6))
 
-def convert():
-    s = entry_value.get().strip()
-    if s == "":
-        label_result.config(text="Enter a number", fg="red")
-        return
+def find_zodiac():
     try:
-        value = float(s.replace(",", "."))
+        day = int(entryD.get())
+        month = int(entryM.get())
+        year = int(entryY.get())
     except ValueError:
-        label_result.config(text="Error: invalid input", fg="red")
+        result_label.config(text="Please enter valid integers for day, month, and year.", fg="coral")
         return
 
-    u_from = from_var.get()
-    u_to = to_var.get()
-    liters = value * UNIT_TO_LITERS[u_from]
-    result = liters / UNIT_TO_LITERS[u_to]
+    days_in_month = [31, 29 if is_leap_year(year) else 28, 31, 30, 31, 30,
+                     31, 31, 30, 31, 30, 31]
+    
+    if month < 1 or month > 12 or day < 1 or day > days_in_month[month-1]:
+        result_label.config(text="Invalid date!", fg="coral")
+        return
 
-    if abs(result - round(result)) < 1e-12:
-        out = f"{int(round(result))}"
+    if (month == 1 and day >= 20) or (month == 2 and day <= 18):
+        zodiaс = "Aquarius"
+    elif (month == 2 and day >= 19) or (month == 3 and day <= 20):
+        zodiaс = "Pisces"
+    elif (month == 3 and day >= 21) or (month == 4 and day <= 19):
+        zodiaс = "Aries"
+    elif (month == 4 and day >= 20) or (month == 5 and day <= 20):
+        zodiaс = "Taurus"
+    elif (month == 5 and day >= 21) or (month == 6 and day <= 20):
+        zodiaс = "Gemini"
+    elif (month == 6 and day >= 21) or (month == 7 and day <= 22):
+        zodiaс = "Cancer"
+    elif (month == 7 and day >= 23) or (month == 8 and day <= 22):
+        zodiaс = "Leo"
+    elif (month == 8 and day >= 23) or (month == 9 and day <= 22):
+        zodiaс = "Virgo"
+    elif (month == 9 and day >= 23) or (month == 10 and day <= 22):
+        zodiaс = "Libra"
+    elif (month == 10 and day >= 23) or (month == 11 and day <= 21):
+        zodiaс = "Scorpio"
+    elif (month == 11 and day >= 22) or (month == 12 and day <= 21):
+        zodiaс = "Sagittarius"
     else:
-        out = f"{result:.6f}".rstrip("0").rstrip(".")
+        zodiaс = "Capricorn"
 
-    label_result.config(text=f"{out} ({u_to})", fg="green")
+    result_label.config(text=f"Your Zodiac sign is: {zodiaс}", fg="black")
 
-def clear():
-    entry_value.delete(0, tk.END)
-    label_result.config(text="")
+    try:
+        img = tk.PhotoImage(file=f"./img/{zodiaс}.png")
+        image_label.config(image=img)
+        image_label.image = img       
+    except Exception:
+        image_label.config(text="Image not found", image="")
+        image_label.image = None
 
-btn_frame = tk.Frame(root, bg="#f2f2f2")
-btn_frame.pack(pady=(6, 8))
 
-btn_convert = tk.Button(btn_frame, text="Convert", font=("Arial", 12), width=16, command=convert)
-btn_convert.grid(row=0, column=0, padx=6, pady=6)
+button = tk.Button(root, text="Find Zodiac Sign", font=('Arial', 14), bg="black", fg="whitesmoke", command=find_zodiac)
+button.pack(padx=20,pady=20)
+result_label = tk.Label(root, text="", font=('Arial', 14), bg = "lightblue")
+result_label.pack(padx=20,pady=0)
+image_label = tk.Label(root, bg="lightblue")
+image_label.pack(pady=10)
+image = tk.PhotoImage(file="")
 
-btn_clear = tk.Button(btn_frame, text="Clear", font=("Arial", 12), width=10, command=clear)
-btn_clear.grid(row=0, column=1, padx=6, pady=6)
-
-root.bind("<Return>", lambda event: convert())
 
 root.mainloop()
