@@ -1,41 +1,92 @@
 import threading
-import random
-
-rnd = random.Random()
-my_drinks = ["coffee", "tea", "juice", "water", "soda", "fanta", "chocolate"]
-taken_drinks = []
-my_names = ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace"]
+import tkinter as tk
+import time
 
 threads = []
+carrot_count = 0
+harvestL = False
+harvestM = False
+harvestR = False
 
-def take_a_drink(name, drink, in_or_out):
-    if in_or_out == 0:
-        print(f"{name} entered the cafe.")
+root = tk.Tk()
+root.title("Carrot Growing Simulator")
+root.geometry("300x350")
+root.configure(bg="lightblue")
 
-        if drink not in taken_drinks:
-            taken_drinks.append(drink)
-            print(f"{name} took a {drink} drink.")
-        else:
-            print(f"Sorry {name}, the {drink} drink is already taken.")
+images = [tk.PhotoImage(file=f"Threads_practice/img/{i}.png") for i in range(1, 9)]
 
-        print(f"{name} leaved the cafe.")
+root.grid_columnconfigure(0, weight=1)
+root.grid_columnconfigure(1, weight=1)
+root.grid_columnconfigure(2, weight=1)
+
+labelCCount = tk.Label(root, text=f"Carrot Count: {carrot_count}", bg="lightblue", font=("Arial", 12))
+labelCCount.grid(row=0, column=0, columnspan=3, pady=10)
+
+labelImgL = tk.Label(root, bg="lightblue")
+labelImgL.grid(row=2, column=0)
+
+labelImgM = tk.Label(root, bg="lightblue")
+labelImgM.grid(row=2, column=1)
+
+labelImgR = tk.Label(root, bg="lightblue")
+labelImgR.grid(row=2, column=2)
+
+label_map = {"L": labelImgL, "M": labelImgM, "R": labelImgR}
+
+def grow(btn_name, harvest_flag_name):
+    global harvestL, harvestM, harvestR
+
+    img_label = label_map[harvest_flag_name]
+
+    for stage in range(len(images)):
+        time.sleep(1)
+        img_label.config(image=images[stage])
+
+    if harvest_flag_name == "L":
+        harvestL = True
+    elif harvest_flag_name == "M":
+        harvestM = True
+    elif harvest_flag_name == "R":
+        harvestR = True
+
+def harvest(btn_name, harvest_flag_name):
+    global carrot_count
+    carrot_count += 1
+    labelCCount.config(text=f"Carrot Count: {carrot_count}")
+
+    if harvest_flag_name == "L":
+        global harvestL
+        harvestL = False
+    elif harvest_flag_name == "M":
+        global harvestM
+        harvestM = False
+    elif harvest_flag_name == "R":
+        global harvestR
+        harvestR = False
+
+    label_map[harvest_flag_name].config(image="") 
+
+def start(btn_name, harvest_flag_name):
+    if ((harvest_flag_name=="L" and not harvestL) or 
+        (harvest_flag_name=="M" and not harvestM) or
+        (harvest_flag_name=="R" and not harvestR)):
+        
+        grow_thread = threading.Thread(target=grow, args=(btn_name, harvest_flag_name))
+        grow_thread.start()
+        threads.append(grow_thread)
     else:
-        print(f"{name} entered the cafe.")
+        harvest(btn_name, harvest_flag_name)
 
-        if drink not in taken_drinks:
-            taken_drinks.append(drink)
-            print(f"{name} took a {drink} drink.")
-        else:
-            print(f"Sorry {name}, the {drink} drink is already taken.")
+btnCarrotL = tk.Button(root, width=4, height=2, font=("Arial", 10), bg="brown",
+                       command=lambda: start(btnCarrotL, "L"))
+btnCarrotL.grid(row=1, column=0, padx=2, pady=10)
 
-        print(f"{name} stayed to have a good time")
+btnCarrotM = tk.Button(root, width=4, height=2, font=("Arial", 10), bg="brown",
+                       command=lambda: start(btnCarrotM, "M"))
+btnCarrotM.grid(row=1, column=1, padx=2, pady=10)
 
-for i in range(7):
-    name = my_names[i]
-    tmpTread = threading.Thread(target=take_a_drink, args=[name, rnd.choice(my_drinks), rnd.randint(0,1)])
-    tmpTread.start()
-    threads.append(tmpTread)
+btnCarrotR = tk.Button(root, width=4, height=2, font=("Arial", 10), bg="brown",
+                       command=lambda: start(btnCarrotR, "R"))
+btnCarrotR.grid(row=1, column=2, padx=2, pady=10)
 
-
-for i in range(7):
-    threads[i].join()
+root.mainloop()
